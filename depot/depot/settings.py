@@ -35,7 +35,7 @@ INSTALLED_APPS = (
 # 	'django.contrib.contenttypes',
 # 	'django.contrib.sessions',
 # 	'django.contrib.messages',
-# 	'django.contrib.staticfiles',
+ 	'django.contrib.staticfiles',
 	'depotapp'
 )
 
@@ -92,3 +92,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'depot/templates')]
+STATICFILES_DIRS  = (os.path.join(BASE_DIR, 'depot/static'),)
