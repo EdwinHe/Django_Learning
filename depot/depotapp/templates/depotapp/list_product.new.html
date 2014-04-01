@@ -5,26 +5,28 @@
 {% block content %}
 <div class="container">	
 	<div class="page-header">
-	<h2>Product List</h2>
+	<h3>Product List</h3>
 </div>
+<table class="table-striped">
 {% for item in list_items.object_list %}
-<div class="row" style="padding-top:10">
-	 <div class="span2 margin-grid">
+<tr class="row" style="padding-top:10">
+	 <td class="span2 margin-grid">
 		  <a href="#">
 		 <img class="thumbnail" src="{{item.image_url}}" alt="">
 		 </a>
-	 </div>
-	 <div class="span8">
+	 </td>
+	 <td class="span8">
 		  <h4>{{item.title}}</h4>
 		  {{item.description}}
-	 </div>
-	 <div class="span1" style="align:right">
+	 </td>
+	 <td class="span1" style="align:right">
 		  <p><a class="btn btn-primary" href="{% url 'depotapp:view' item.id %}">View</a></a></p>
 		  <p><a class="btn btn-success" href="{% url 'depotapp:edit' item.id %}">Edit</a></p>
 		  <p><a class="btn btn-danger" href="#">Delete</a></p>
-	 </div>
-</div>
+	 </td>
+</tr>
 {% endfor %}
+</table>
 {% if list_items.has_previous %}
 	<a href="?page={{ list_items.previous_page_number }}">Last Page</a>
 {% endif %}
