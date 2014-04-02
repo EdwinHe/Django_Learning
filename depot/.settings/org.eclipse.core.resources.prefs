@@ -1,5 +1,7 @@
 eclipse.preferences.version=1
+encoding//depotapp/models.py=UTF-8
 encoding//depotapp/templates/depotapp/list_product.html=UTF-8
 encoding//depotapp/templates/depotapp/list_product.new.html=UTF-8
 encoding//depotapp/templates/depotapp/store.html=UTF-8
+encoding//depotapp/templates/depotapp/view_cart.html=UTF-8
 encoding//depotapp/views.py=UTF-8

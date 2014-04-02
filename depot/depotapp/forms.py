@@ -1,9 +1,9 @@
 from django import forms
-from depotapp import models
+from depotapp.models import Product, Cart, LineItem
 
 class ProductForm(forms.ModelForm):
     class Meta:
-        model = models.Product	
+        model = Product	
         # exclude = [] # uncomment this line and specify any field to exclude it from the form
 
     def __init__(self, *args, **kwargs):
@@ -21,3 +21,11 @@ class ProductForm(forms.ModelForm):
         if not url.endswith(('.jpg', '.png', '.gif')):
             raise forms.ValidationError('Image format must be jpg, png or gif')
         return url
+
+## MODEL CHANGE
+class CartForm(forms.ModelForm):
+    class Meta:
+        model = Cart
+        
+    def __init__(self, *args, **kwargs):
+        super(CartForm, self).__init__(*args, **kwargs)

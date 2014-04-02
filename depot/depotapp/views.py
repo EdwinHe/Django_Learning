@@ -10,7 +10,10 @@ from django.core.paginator import Paginator
 from django.core.urlresolvers import reverse
 
 from depotapp.forms import ProductForm
-from depotapp.models import Product
+from depotapp.models import Product, Cart, LineItem
+
+# Step 4
+import datetime
 
 # Create your views here.
 # Step 1
@@ -65,3 +68,30 @@ def edit_product(request, id):
     t=get_template('depotapp/edit_product.html')
     c=RequestContext(request,locals())
     return HttpResponse(t.render(c))
+
+def store_view(request):
+    products = Product.objects.filter(date_available__lt=datetime.datetime.now().date()).order_by("-date_available")
+    t = get_template('depotapp/store.html')
+    c = RequestContext(request,locals())
+    return HttpResponse(t.render(c))
+
+
+def view_cart(request, id):
+    ## MODEL CHANGE
+    
+    #item1 = LineItem(product = Product.objects.get(pk=1), unit_price = 30, quantity = 1)
+    #item2 = LineItem(product = Product.objects.get(pk=2), unit_price = 40, quantity = 1)
+    
+    #cart = Cart()
+    #cart.items=[item1,item2]
+    #cart.total_price = 100
+    
+    #import pdb; pdb.set_trace()
+    #cart = request.session.get("cart", None)
+    a_cart = Cart.objects.get(id = id)
+    list_items = LineItem.objects.filter(cart__exact = id)
+    t = get_template('depotapp/view_cart.html')
+            
+    c = RequestContext(request,locals())        
+    return HttpResponse(t.render(c))
+
