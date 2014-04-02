@@ -14,6 +14,7 @@ from depotapp.models import Product, Cart, LineItem
 
 # Step 4
 import datetime
+from django.core import serializers
 
 # Create your views here.
 # Step 1
@@ -92,6 +93,77 @@ def view_cart(request, id):
     list_items = LineItem.objects.filter(cart__exact = id)
     t = get_template('depotapp/view_cart.html')
             
-    c = RequestContext(request,locals())        
+    c = RequestContext(request,{"a_cart": a_cart, "list_items": list_items})        
     return HttpResponse(t.render(c))
+
+def add_to_cart(request, id):
+      # Original Code
+#     product = Product.objects.get(id = id)
+#     cart = request.session.get("cart",None)
+#     if not cart:
+#         cart = Cart()
+#         request.session["cart"] = cart
+#     cart.add_product(product)
+#     request.session['cart'] = cart
+#     return view_cart(request)
+
+    cart_id = 1 #Hard-code for now, it will be linked to customer who logged in.
+    product = Product.objects.get(id = id)
+    cart = Cart.objects.get(id__exact = cart_id)
+    items_in_cart = LineItem.objects.filter(cart__exact = cart_id)
+    
+    # If any item in cart is the same product we are adding to cart
+    # Change the quantity, otherwise, new LineItem add.
+    cart.total_price += product.price
+    cart.save()
+    for item in items_in_cart:
+        if item.product.id == int(id):
+            item.quantity += 1
+            item.save()
+            break
+    else:
+        LineItem.objects.create(cart = cart, product = product, quantity = 1)
+
+    return view_cart(request, cart_id)
+
+
+def clean_cart(request, id):
+# # Original Code
+# def clean_cart(request):  
+#     request.session['cart'] = Cart()  
+#     return view_cart(request)  
+
+    LineItem.objects.filter(cart__exact = id).delete()
+    cart = Cart.objects.get(id__exact = id)
+    cart.total_price = 0
+    cart.status = Cart.SHOPPING
+    cart.save()
+
+    return view_cart(request, id)
+
+
+
+
+
+def view_cart_serialize(request):
+    
+#def view_cart(request):
+#     cart = request.session.get("cart",None)
+#     t = get_template('depotapp/view_cart.html')
+# 
+#     if not cart:
+#         cart = Cart()
+#         request.session["cart"] = cart
+#             
+#     c = RequestContext(request,locals())  #{'cart': cart}      
+#     return HttpResponse(t.render(c))
+    
+    t = get_template('depotapp/view_cart_serialize.html')
+    
+    list_items = LineItem.objects.all()
+    list_items_ser = serializers.serialize('json', list_items)
+    request.session["list_items_ser"] = list_items_ser
+        
+    c = RequestContext(request,{'list_items':list_items})        
+    return HttpResponse(t.render(c)) #content_type="application/json"
 

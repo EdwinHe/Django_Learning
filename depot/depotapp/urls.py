@@ -12,6 +12,9 @@ urlpatterns = patterns('',
     url(r'product/view/(?P<id>[^/]+)/$', views.view_product, name = 'view'), 
     
     # Step 4
-    url(r'store/$', views.store_view, name = 'store'),  
-    url(r'cart/view/(?P<id>[^/]+)/$', views.view_cart, name = 'cart'),
+    url(r'store/$', views.store_view, name = 'store_view'),
+    #url(r'cart/view/$', views.view_cart_serialize, name = 'cart_serialize'), # FOR SERIALIZATION TEST
+    url(r'cart/view/(?P<id>[^/]+)/$', views.view_cart, name = 'cart_view'),
+    url(r'cart/add/(?P<id>[^/]+)/$', views.add_to_cart, name = 'add_to_cart'),
+    url(r'cart/clean/(?P<id>[^/]+)/$', views.clean_cart, name = 'clean_cart'),
 )

@@ -109,3 +109,6 @@ STATICFILES_DIRS  = (os.path.join(BASE_DIR, 'depot/static'),)
 #         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
 #     ]
 # }
+
+# Trun this on to allow accessing request.session.ITEMS from template
+#TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.request',)
