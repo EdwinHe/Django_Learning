@@ -16,6 +16,11 @@ from depotapp.models import Product, Cart, LineItem
 import datetime
 from django.core import serializers
 
+# Step 7 FOR REST FRAMEWORK 
+from rest_framework import viewsets
+from rest_framework import serializers
+from depotapp.serializers import CartSerializer, LineItemSerializer, ProductSerializer
+
 # Create your views here.
 # Step 1
 def depotapp_test(request):
@@ -166,4 +171,29 @@ def view_cart_serialize(request):
         
     c = RequestContext(request,{'list_items':list_items})        
     return HttpResponse(t.render(c)) #content_type="application/json"
+
+
+## Step 7. FOR REST FRAMEWORK
+class CartViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = Cart.objects.all()
+    serializer_class = CartSerializer
+
+class LineItemViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = LineItem.objects.all()
+    serializer_class = LineItemSerializer
+    
+class ProductViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    
+
 
