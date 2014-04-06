@@ -6,21 +6,22 @@ from depotapp.models import Cart, LineItem, Product
 class CartSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Cart
-		fields = ('total_price', 'status')
+		fields = ('id', 'total_price', 'status')
 
 class ProductSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Product
-		fields = ('title', 'description', 'image_url', 'price', 'date_available')
+		fields = ('id', 'title', 'description', 'image_url', 'price', 'date_available')
 
 class LineItemSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = LineItem
-		fields = ('cart', 'product', 'quantity')
+		fields = ('id', 'cart', 'product', 'quantity')
 	
 	# Nested Objects (foreign keys) need to set serializer explicitly 
 	#cart = CartSerializer()
 	#product = ProductSerializer()
+	id = serializers.Field()
 	cart = serializers.PrimaryKeyRelatedField()
 	product = serializers.PrimaryKeyRelatedField()
 	quantity = serializers.IntegerField()

@@ -29,8 +29,6 @@ class LineItem(models.Model):
     product = models.ForeignKey(Product)
     quantity = models.IntegerField()
     
-    def add_to_cart(self):
-        pass
     #unit_price = models.DecimalField(max_digits=8,decimal_places=2)
     
         

@@ -21,6 +21,5 @@ urlpatterns = patterns('',
     
     # REST Framework
     url(r'^API/', include(router.urls)),
-    #url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 )
 

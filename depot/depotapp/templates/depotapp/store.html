@@ -4,28 +4,215 @@
 {% block pagename %} 产品目录 {% endblock %}
 
 {% block content %} 
+<div class="row">
+	<div class="span13">
 {% for item in products %}
-<div class="row" style="padding-top:10">
-	<div class="span3 media-grid">
-		<a href="#">
-	    <img class="thumbnail" src="{{item.image_url}}" alt="">
-	    </a>
-	</div>
-	<div class="span-two-thirds">
-		<h3>{{item.title}}</h3>
-		<br/>
-		{{item.description}}
-		<br/>
-		<br/>
-		<br/>
-		<div class="row">
-			<div class="span2"><h3>￥{{item.price|floatformat:"2"}}</h3></div>
-			<div class="span"><a class="btn primary" href="{% url 'depotapp:add_to_cart' item.id %}">加入购物车</a></div>
+		<div class="row" style="padding-top:10">
+			<div class="span3 media-grid">
+				<a href="#">
+			    <img class="thumbnail" src="{{item.image_url}}" alt="">
+			    </a>
+			</div>
+			<div>
+				<h3>{{item.title}}</h3>
+				<br/>
+				{{item.description}}
+				<br/>
+				<br/>
+				<br/>
+				<div class="row pull-right" style="margin-right:50px">
+					<div class="span2"><h3>￥{{item.price|floatformat:"2"}}</h3></div>
+					<div class="span"><a class="btn primary" productid="{{ item.id }}" price="{{ item.price }}" href="#">加入购物车</a></div>
+				</div>
+			</div>
+		
 		</div>
-	</div>
-
-</div>
-<div class="page-header">
-</div>
+		<div class="page-header">
+		</div>
 {% endfor %}
+	</div> <!--  span10 -->
+	<div class="span6">
+		<h5>我的购物车</h5><br/>
+		<table id="tabCart" class="condensed-table">
+			<tbody id="items">
+			</tbody>
+			<tfoot>
+				<tr>
+					<td></td>
+					<td>总计：</td>
+					<td id="totalprice"> ¥ {{ cart.total_price | floatformat:"2" }}</td>
+				</tr>
+			</tfoot>
+		</table>
+		
+		<a class="btn danger" onclick="onClick_clearupCart(); return false">清空</a>
+		<a class="btn success" href="#">结算</a>
+	</div> <!-- span4 -->
+</div>
+
 {% endblock %}
+
+
+{% block js %}
+<!--js from store.html-->
+<script>
+	// DELETE FUNCTIONS
+	function onClick_clearupCart(){
+		$.getJSON('/API/lineitem/?cartid=' + {{cart_id}}, clearupCart);
+	}
+	
+	function clearupCart(lineitems){
+		//var tbody = document.getElementById('items')
+		//tbody.innerHTML = "";
+		
+		$.each( lineitems.results, 
+			function( key, value ) {
+				$.ajax({
+					  type: "DELETE",
+					  url: "/API/lineitem/"+value.id+"/",
+					  async: false,
+					});
+			}
+		);
+		
+		// SET TOTAL PRICE OF CART to 0
+		$.getJSON('/API/cart/' + {{cart_id}} + '/',
+			function(cart){
+				$.ajax({
+				    url: '/API/cart/' + cart.id + '/',
+				    type: 'PUT',
+				    data: {"total_price":0.00, "status":cart.status},
+					async: false,
+				});
+			}
+		);
+		
+		$.getJSON('/API/lineitem/?cartid=' + {{cart_id}}, refreshCart);
+	}
+	
+	
+	// ADD TO CART
+	function onClick_addToCart(){
+		var product_id=$(this).attr("productid");
+		var product_price=$(this).attr("price");
+		
+		$.getJSON('/API/lineitem/?cartid=' + {{cart_id}} +'&productid=' + product_id, 
+			function(lineitem) {
+				// ADD TO TOTAL PRICE OF CART
+				$.getJSON('/API/cart/' + {{cart_id}} + '/',
+					function(cart){
+						var total_price = parseFloat(cart.total_price) + parseFloat(product_price)
+						$.ajax({
+						    url: '/API/cart/' + cart.id + '/',
+						    type: 'PUT',
+						    data: {"total_price":total_price, "status":cart.status},
+							async: false,
+						});
+					}
+				);
+			
+				// ADD NEW OR UPDATE QUANTITY
+				if (lineitem.count !== 0) {
+					var quantity = lineitem.results[0].quantity
+					quantity += 1
+					$.ajax({
+					    url: '/API/lineitem/' + lineitem.results[0].id + '/',
+					    type: 'PUT',
+					    data: {"cart":lineitem.results[0].cart, "product":lineitem.results[0].product, "quantity":quantity},
+						async: false,
+					});
+				} 
+				else {
+					//$.post("/API/lineitem/",{"cart":{{cart_id}}, "product":product_id, "quantity":1});
+					// **use $.ajax() instead of post as we need to wait for a response (async=false), 
+					// **otherwise, the getJSON will not be getting the lastest
+					$.ajax({
+						  type: "POST",
+						  url: "/API/lineitem/",
+						  data: {"cart":{{cart_id}}, "product":product_id, "quantity":1},
+						  async: false,
+						});
+					
+				} //else
+					
+				// REFRESH CART 
+				$.getJSON('/API/lineitem/?cartid=' + {{cart_id}}, refreshCart);
+			} //function
+		); //$.getJSON
+	} 
+
+	function refreshCart(lineitems){
+		//var total = 0;
+		//var tbody = $('tbody#items')[0];
+		var tbody = document.getElementById('items')
+		tbody.innerHTML = "";
+		
+		$.each( lineitems.results, 
+			function( key, value ) {
+				$.getJSON("/API/product/" + value.product +"/", 
+					function(product){
+						$('table#tabCart').append(
+							'<tr><td>'+value.quantity+' x</td>'+
+							'<td>'+product.title +'</td><td>￥'+product.price+
+							'</td></tr>'); 
+						}
+				); //getJSON
+			}
+		);
+		
+		$.getJSON("/API/cart/" + {{cart_id}} +"/", 
+			function(cart) {
+				document.getElementById('totalprice').innerHTML = '¥ '+ cart.total_price;
+			}
+		);
+		
+		
+		// **Original Code for reference**
+		//total = 0;
+		//var tbody = $('tbody#items')[0];
+		//tbody.innerHTML = "";
+		//for(var i=0;i<items.length;i++){
+		//	total += items[i].quantity * items[i].product.price;
+		//	$('table#tabCart').append('<tr><td>'+items[i].quantity+' x</td>'+
+		//		'<td>'+items[i].product.title +'</td><td>￥'+items[i].product.price+
+		//		'</td></tr>');		          
+		//}
+		//$('#totalprice')[0].innerHTML = '¥ '+items.length;
+	}
+</script>
+{% endblock %}
+
+
+{% block on_ready %} 
+//store.html on ready
+
+// STAGE ONE
+//	$('a.btn[productid]').bind("click",function(){
+//		alert($(this).attr("productid"));			
+//	}
+//);
+
+// STAGE TWO
+//	$('a.btn[productid]').bind("click",function(){
+//		var product_id=$(this).attr("productid");
+//			//alert(product_id);			
+//			$.get("/API/product/" + product_id +"/",
+//				function(data){
+//					alert(data);
+//				}
+//			);
+//		}
+//	);
+
+// STAGE THREE
+	$.getJSON('/API/lineitem/?cartid=' + {{cart_id}}, refreshCart);
+	$('a.btn[productid]').bind("click", onClick_addToCart);
+	
+	
+{% endblock %}
+
+
+
+
+
+ 

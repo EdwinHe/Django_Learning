@@ -21,6 +21,8 @@ from rest_framework import viewsets
 from rest_framework import serializers
 from depotapp.serializers import CartSerializer, LineItemSerializer, ProductSerializer
 
+from django.db.models import Q
+
 # Create your views here.
 # Step 1
 def depotapp_test(request):
@@ -76,7 +78,14 @@ def edit_product(request, id):
     return HttpResponse(t.render(c))
 
 def store_view(request):
+    
     products = Product.objects.filter(date_available__lt=datetime.datetime.now().date()).order_by("-date_available")
+    
+    # Step 8
+    cart_id = 1
+    cart = Cart.objects.get(id = cart_id)
+    lineitems = LineItem.objects.filter(cart__exact = cart_id)
+    
     t = get_template('depotapp/store.html')
     c = RequestContext(request,locals())
     return HttpResponse(t.render(c))
@@ -144,7 +153,7 @@ def clean_cart(request, id):
     cart.status = Cart.SHOPPING
     cart.save()
 
-    return view_cart(request, id)
+    return HttpResponseRedirect(reverse('depotapp:store_view'))
 
 
 
@@ -185,8 +194,27 @@ class LineItemViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
-    queryset = LineItem.objects.all()
+    model = LineItem
+    #queryset = LineItem.objects.all()
     serializer_class = LineItemSerializer
+    
+    def get_queryset(self):
+        #import pdb;pdb.set_trace()
+        # Ideally, cart is linked with user and user is retrieved by self.request.user
+        queryset = LineItem.objects.all()
+          
+        cartid = self.request.QUERY_PARAMS.get('cartid', None)
+        productid = self.request.QUERY_PARAMS.get('productid', None)
+        
+        if cartid and productid:
+            queryset = LineItem.objects.filter(Q(cart__exact = cartid) & Q(product__exact = productid))
+        elif cartid:
+            queryset = LineItem.objects.filter(cart__exact = cartid)
+        elif productid:
+            queryset = LineItem.objects.filter(cart__exact = productid)
+        
+        return queryset
+    
     
 class ProductViewSet(viewsets.ModelViewSet):
     """
@@ -194,6 +222,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     """
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    
+    
     
 
 
