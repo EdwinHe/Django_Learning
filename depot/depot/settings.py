@@ -30,23 +30,24 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
-# 	'django.contrib.admin',
-# 	'django.contrib.auth',
-# 	'django.contrib.contenttypes',
-	'django.contrib.sessions',
-# 	'django.contrib.messages',
+ 	'grappelli', #Step 9, must stay ahead of 'django.contrib.admin' 
+ 	'django.contrib.admin',  #Step 9
+ 	'django.contrib.auth', #Step 9 
+ 	'django.contrib.contenttypes', #Step 9
+  	'django.contrib.messages', #Step 9
+  	'django.contrib.sessions', #Step 9
  	'django.contrib.staticfiles',
 	'depotapp',
  	'rest_framework',  # REST Framework
 )
 
 MIDDLEWARE_CLASSES = (
-	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware', #Step 9
 # 	'django.middleware.common.CommonMiddleware',
-# 	'django.middleware.csrf.CsrfViewMiddleware',
-# 	'django.contrib.auth.middleware.AuthenticationMiddleware',
-# 	'django.contrib.messages.middleware.MessageMiddleware',
-# 	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+#	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',  #Step 9
+	'django.contrib.messages.middleware.MessageMiddleware', #Step 9
+#	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'depot.urls'
@@ -104,4 +105,19 @@ REST_FRAMEWORK = {
 }
 
 # Trun this on to allow accessing request.session.ITEMS from template
-#TEMPLATE_CONTEXT_PROCESSORS = ('django.core.context_processors.request',)
+# Step 9
+TEMPLATE_CONTEXT_PROCESSORS = (
+	'django.core.context_processors.request',
+	'django.contrib.auth.context_processors.auth',
+)
+
+# Step 9, I think these two settings are the default setting, may not need to
+# be explicitly defined. 
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+)
+
+# Step 9, for 'python manage.py collectstatic', it will collect all static files 
+# into static_root for DEVELOPMENT. 
+STATIC_ROOT  = os.path.join(BASE_DIR, 'static_root')
