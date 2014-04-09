@@ -22,8 +22,11 @@ urlpatterns = patterns('',
     url(r'^API/', include(router.urls)),
     
     # Admin Step 9
-    (r'^grappelli/', include('grappelli.urls')), # grappelli URLS
-    (r'^admin/',  include(admin.site.urls)), # admin site
+    url(r'^grappelli/', include('grappelli.urls')), # grappelli URLS
+    url(r'^admin/',  include(admin.site.urls)), # admin site
     
+    # Auth - Step 10
+    url(r'^accounts/login/$', views.login_view, name = 'login'),
+    url(r'^accounts/logout/$', views.logout_view, name = 'logout'),
 )
 

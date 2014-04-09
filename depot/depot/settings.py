@@ -42,9 +42,9 @@ INSTALLED_APPS = (
 )
 
 MIDDLEWARE_CLASSES = (
-	'django.contrib.sessions.middleware.SessionMiddleware', #Step 9
+	'django.middleware.csrf.CsrfViewMiddleware',  #Step 10
+    'django.contrib.sessions.middleware.SessionMiddleware', #Step 9
 # 	'django.middleware.common.CommonMiddleware',
-#	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',  #Step 9
 	'django.contrib.messages.middleware.MessageMiddleware', #Step 9
 #	'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -121,3 +121,6 @@ STATICFILES_FINDERS = (
 # Step 9, for 'python manage.py collectstatic', it will collect all static files 
 # into static_root for DEVELOPMENT. 
 STATIC_ROOT  = os.path.join(BASE_DIR, 'static_root')
+
+# Step 10, add this setting override's the login URL of decorator: @login_required
+# LOGIN_URL='/account/abc'

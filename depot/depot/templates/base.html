@@ -17,43 +17,66 @@
 </head>
 <body>
 	<div class="topbar">
-      <div class="fill">
-        <div class="container">
-          <a class="brand" href="#">Depot</a>
-          <ul class="nav">
-            <li class="active"><a href="#">首页</a></li>
-            <li><a href="#about">问题</a></li>
-            <li><a href="#contact">新闻</a></li>
-			<li><a href="#contact">联系我们</a></li>
-          </ul>
-          <form action="" class="pull-right">
-            <input class="input-small" type="text" placeholder="用户名">
-            <input class="input-small" type="password" placeholder="密码">
-            <button class="btn" type="submit">登录</button>
-          </form>
-        </div>
-      </div>
-    </div>
+		<div class="fill">
+			<div class="container">
+				<a class="brand" href="#">Depot</a>
+				<ul class="nav">
+					<li class="active"><a href="#">首页</a></li>
+					<li><a href="#about">问题</a></li>
+					<li><a href="#contact">新闻</a></li>
+					<li><a href="#contact">联系我们</a></li>
+				</ul>
+			{% if request.user.is_authenticated %}
+				<div class="pull-right">
+					<a href=#>欢迎您：{{request.user}}</a>
+					<a class="btn danger small" href="{% url 'logout' %}">注销</a>
+				</div>
+			{% else %}
+				<form action="{% url 'login' %}" method='post' class="pull-right">
+					{% csrf_token %}
+					<input name='username' class="input-small" type="text" placeholder="用户名">
+					<input name='password'class="input-small" type="password" placeholder="密码">
+					<button class="btn" type="submit">登录</button>
+				</form>
+			{% endif %}
+			</div>
+		</div>
+	</div>
 
-    <div class="container" style="margin-top:50px">
-      <div class="content">
-        <div class="page-header">
-          <h1>{% block pagename %} 页面名称 {% endblock %}</h1>
-        </div>
-		{% block content %} 
-		内容
-		{% endblock %}
-	  </div><!-- /content -->
+	<div class="container" style="margin-top:50px">
+		<div class="content">
+			<div class="page-header">
+				<h1>{% block pagename %} 页面名称 {% endblock %}</h1>
+			</div>
+			{% block content %} 
+			内容
+			{% endblock %}
+	 	</div><!-- /content -->
 	</div><!-- /container -->
 	<script src="{% static 'js/jquery-2.1.0.js' %}"></script>
     {% block js %}
-        <!--这里插入具体页面引用的js库，或者js代码-->
-     {% endblock %}
+		<!--这里插入具体页面引用的js库，或者js代码-->
+	{% endblock %}
     <script>
+    // Step 10
+    function csrfSafeMethod(method) {
+	    // these HTTP methods do not require CSRF protection
+	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+
+	$.ajaxSetup({
+	    crossDomain: false, // obviates need for sameOrigin test
+	    beforeSend: function(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type)) {
+	            xhr.setRequestHeader("X-CSRFToken", '{{csrf_token}}');
+	        }
+	    }
+	});
+	
     $(function () {
-        //这里编写base界面的on_ready代码
+		//这里编写base界面的on_ready代码
         {% block on_ready %}
-            //这里插入具体界面的on_ready代码
+			//这里插入具体界面的on_ready代码
         {% endblock %}
     });
     </script>

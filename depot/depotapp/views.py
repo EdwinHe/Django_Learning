@@ -23,6 +23,10 @@ from depotapp.serializers import CartSerializer, LineItemSerializer, ProductSeri
 
 from django.db.models import Q
 
+# Step 10
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+
 # Create your views here.
 # Step 1
 def depotapp_test(request):
@@ -39,6 +43,7 @@ def create_product(request):
     c = RequestContext(request,locals())
     return HttpResponse(t.render(c))
 
+@login_required
 def list_product(request):
     list_items = Product.objects.all()
     paginator = Paginator(list_items ,10)
@@ -77,14 +82,33 @@ def edit_product(request, id):
     c=RequestContext(request,locals())
     return HttpResponse(t.render(c))
 
+#@login_required
 def store_view(request):
     
     products = Product.objects.filter(date_available__lt=datetime.datetime.now().date()).order_by("-date_available")
     
     # Step 8
-    cart_id = 1
-    cart = Cart.objects.get(id = cart_id)
-    lineitems = LineItem.objects.filter(cart__exact = cart_id)
+    # === Step 10 ===
+    #import pdb;pdb.set_trace()
+    if request.user.is_authenticated():
+        try:
+            cart = Cart.objects.get(user = request.user.id)
+        except:
+            cart = Cart.objects.create(user = request.user, total_price = 0.00, status = Cart.SHOPPING) 
+            
+        cart_id = cart.id
+        
+    else:
+        cart_id = 0
+    
+    # ===============
+    
+    if cart_id == 0:
+        cart = None
+        lineitems = None
+    else:
+        cart = Cart.objects.get(id = cart_id)
+        lineitems = LineItem.objects.filter(cart__exact = cart_id)
     
     t = get_template('depotapp/store.html')
     c = RequestContext(request,locals())
@@ -223,7 +247,25 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     
+def login_view(request):
+    #import pdb;pdb.set_trace()
+    try:
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                #return store_view(request)
+                return HttpResponseRedirect(reverse('depotapp:store_view'))
+            else:
+                return HttpResponse("Account Disabled!")
+        else:
+            return HttpResponse("Login Failed!")
+    except:
+        return HttpResponseRedirect(reverse('depotapp:store_view'))
     
-    
-
+def logout_view(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('depotapp:store_view'))
 

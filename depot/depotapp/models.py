@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth import models as auth_models
 
 # Create your models here.
 class Product(models.Model):
@@ -9,6 +10,7 @@ class Product(models.Model):
     date_available = models.DateField()
         
 class Cart(models.Model):
+    user = models.ForeignKey(auth_models.User) # Step 10
     total_price = models.DecimalField(max_digits = 8, decimal_places = 2, default = 0)
     
     SHOPPING = 'SP'
